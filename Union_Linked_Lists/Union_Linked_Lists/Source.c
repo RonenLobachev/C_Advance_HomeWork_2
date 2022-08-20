@@ -123,6 +123,7 @@ int main() {
 
 	//TODO: Add check for other options: like not existed hash
 #endif
+#ifdef TEST_2
 	//Deleate head
 	printf("------------------------------------------------------\n");
 	head = deleteMessage(head, 3);
@@ -135,6 +136,35 @@ int main() {
 	printf("------------------------------------------------------\n");
 	head = deleteMessage(head, 30);
 	print_list(head);
+#endif
+
+	//Case: Integrity OK
+	if (verifyIntegrity(head, 87651233, msg1->hashDigest.md4) == True)
+	{
+		printf("Verify OK\n");
+	}
+	else
+	{
+		printf("Verify FAIL\n");
+	}
+	//Case: ID OK, hash not
+	if (verifyIntegrity(head, 3, msg1->hashDigest.md4) == True)
+	{
+		printf("Verify OK\n");
+	}
+	else
+	{
+		printf("Verify FAIL\n");
+	}
+	//Case: not exist
+	if (verifyIntegrity(head, 1, msg1->hashDigest.md4) == True)
+	{
+		printf("Verify OK\n");
+	}
+	else
+	{
+		printf("Verify FAIL\n");
+	}
 }
 
 void print_hash(const unsigned char* p) {
@@ -391,7 +421,7 @@ msgListNode* deleteMessage(msgListNode* head, unsigned int id)
 				head = head->next;
 			}
 		}
-		//Lets check if last one is what we search to it
+		//Lets check if tail is what we search to it
 		if (head->next->next == NULL)
 		{
 			if (head->next->data->id == id)
@@ -401,7 +431,7 @@ msgListNode* deleteMessage(msgListNode* head, unsigned int id)
 				head->next = NULL;
 			}
 		}
-		else
+		else /*In this case we know what we want to delete*/
 		{
 			pTmp = head->next;
 			head->next = head->next->next;
@@ -417,4 +447,26 @@ void deleteNode(msgListNode* node)
 	free(node->data->text);//delete string
 	free(node->data);//delete data block.
 	free(node);//delete node
+}
+
+//Function declaration conflict with exersice declaration. Bool have only 2 options(logicly): True or false
+//So in this function in case hash was verified will be returned True, otherwise False
+Bool verifyIntegrity(msgListNode* head, unsigned int id, Byte compareHash[16])
+{
+	if (head == NULL)
+	{
+		return False;
+	}
+	if (head->data->id == id)
+	{
+		if (memcmp(head->data->hashDigest.md4, compareHash, sizeof(compareHash)))
+		{
+			return False;
+		}
+		else
+		{
+			return True;
+		}
+	}
+	return verifyIntegrity(head->next, id, compareHash);
 }
