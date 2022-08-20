@@ -42,7 +42,8 @@ msgListNode* deleteMessage(msgListNode* head, unsigned int id);
 Bool verifyIntegrity(msgListNode* head, unsigned int id, Byte compareHash[16]);
 msgListNode* reverseMsgList(msgListNode* head);
 void freeMsgList(msgListNode* head);
-void print(msgListNode* head);
+void print_list(msgListNode* head);
+void deleteNode(msgListNode* node);
 
 
 int main() {
@@ -66,6 +67,9 @@ int main() {
 	const msgWithHash* msg2 = createMessage(3, "banana1", MD5_HASH);
 	const msgWithHash* msg3 = createMessage(275, "banana2!", MD4_HASH);
 	const msgWithHash* msg4 = createMessage(87651231, "Hello World", MD4_HASH);
+	const msgWithHash* msg5 = createMessage(10, "Hello World_10", MD4_HASH);
+	const msgWithHash* msg6 = createMessage(30, "Hello World_30", MD5_HASH);
+	const msgWithHash* msg7 = createMessage(20, "Hello World_20", MD4_HASH);
 
 	//printMessage(msg1);
 	//printMessage(msg2);
@@ -78,10 +82,13 @@ int main() {
 	head = addMessage(head, msg2);
 	head = addMessage(head, msg3);
 	head = addMessage(head, msg4);
+	head = addMessage(head, msg5);
+	head = addMessage(head, msg6);
+	head = addMessage(head, msg7);
 
 	//print linked list
-	print(head);
-
+	print_list(head);
+#ifdef TEST_1
 	nodeHashIndex =findMsgByHashIterative(head, msg4->hashDigest.md4);
 	
 	if(nodeHashIndex > 0)
@@ -115,6 +122,19 @@ int main() {
 	}
 
 	//TODO: Add check for other options: like not existed hash
+#endif
+	//Deleate head
+	printf("------------------------------------------------------\n");
+	head = deleteMessage(head, 3);
+	print_list(head);
+	//Delete tail
+	printf("------------------------------------------------------\n");
+	head = deleteMessage(head, 87651233);
+	print_list(head);
+	//Delete in the middle
+	printf("------------------------------------------------------\n");
+	head = deleteMessage(head, 30);
+	print_list(head);
 }
 
 void print_hash(const unsigned char* p) {
@@ -160,7 +180,6 @@ msgWithHash* createMessage(unsigned int id, const char* text, HashType type)
 
 	return msg;
 }
-
 
 void printMessage(const msgWithHash* message)
 {
@@ -242,7 +261,7 @@ msgListNode* addMessage(msgListNode* head, msgWithHash* data)
 }
 
 /* Print all the elements in the linked list */
-void print(msgListNode* head)
+void print_list(msgListNode* head)
 {
 	msgListNode* current_node = head;
 	while (current_node != NULL) {
@@ -298,7 +317,6 @@ int findMsgByHashIterative(const msgListNode* head, Byte hash[16])
 	return -1;	
 }
 
-
 int findMsgByHashRecursive(const msgListNode* head, Byte hash[16]) 
 {
 	static counter = 1;
@@ -336,4 +354,67 @@ int findMsgByHashRecursive(const msgListNode* head, Byte hash[16])
 	counter++;
 
 	return findMsgByHashRecursive(head->next, hash);
+}
+
+//Note this function can be recusive if return partameter will be void and poitner to head will be pointer to pointer.
+//With this declaration i dont see how to do this recursive
+msgListNode* deleteMessage(msgListNode* head, unsigned int id)
+{
+	msgListNode* pTmp = head;
+	msgListNode* pNewHead = head;
+	//Check if list exist
+	if (head == NULL)
+	{
+		return NULL;
+	}
+	//Check if head del value in head
+	if (head->data->id == id)
+	{
+		//This is new address of new head
+		pNewHead = head->next;
+		//Now we need to deleate node
+		deleteNode(head);
+		//return pNewHead;
+	}
+	else
+	{
+		//Lets find node to delete
+		while (head->next->next != NULL)
+		{
+			if (head->next->data->id == id)
+			{
+				//Terminate loop
+				break;
+			}
+			else
+			{
+				head = head->next;
+			}
+		}
+		//Lets check if last one is what we search to it
+		if (head->next->next == NULL)
+		{
+			if (head->next->data->id == id)
+			{
+				//We need to deleate tail
+				deleteNode(head->next);
+				head->next = NULL;
+			}
+		}
+		else
+		{
+			pTmp = head->next;
+			head->next = head->next->next;
+			deleteNode(pTmp);
+		}
+	}
+	
+	return pNewHead;
+}
+
+void deleteNode(msgListNode* node)
+{
+	free(node->data->text);//delete string
+	free(node->data);//delete data block.
+	free(node);//delete node
 }
