@@ -166,11 +166,14 @@ int main() {
 		printf("Verify FAIL\n");
 	}
 #endif
+#ifdef TEST_4
 	printf("Before reverse\n");
 	print_list(head);
 	head = reverseMsgList(head);
 	printf("After reverse\n");
 	print_list(head);
+#endif // TEST_4
+	freeMsgList(head);
 }
 
 void print_hash(const unsigned char* p) {
@@ -498,4 +501,14 @@ msgListNode* reverseMsgList(msgListNode* head)
 
 	return pTmp;
 
+}
+
+void freeMsgList(msgListNode* head)
+{
+	if (head == NULL)
+	{
+		return;
+	}
+	freeMsgList(head->next);
+	deleteNode(head);
 }
