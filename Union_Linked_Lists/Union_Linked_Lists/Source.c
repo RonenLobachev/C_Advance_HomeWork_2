@@ -264,9 +264,8 @@ int findMsgByHashIterative(const msgListNode* head, Byte hash[16])
 	int nodeIndex = 1;
 	int result;
 
-	if (sizeof(hash) < 4 || sizeof(hash) > 4) 
+	if ((hash == NULL) || (head == NULL))
 	{
-		
 		return -2;
 	}
 
@@ -299,9 +298,8 @@ int findMsgByHashRecursive(const msgListNode* head, Byte hash[16])
 {
 	static counter = 1;
 
-	if (sizeof(hash) < 4 || sizeof(hash) > 4)
+	if ((hash == NULL) || (head == NULL))
 	{
-
 		return -2;
 	}
 
