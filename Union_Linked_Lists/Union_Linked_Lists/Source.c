@@ -67,10 +67,10 @@ int main() {
 	const msgWithHash* msg3 = createMessage(275, "banana2!", MD4_HASH);
 	const msgWithHash* msg4 = createMessage(87651231, "Hello World", MD4_HASH);
 
-	printMessage(msg1);
-	printMessage(msg2);
-	printMessage(msg3);
-	printMessage(msg4);
+	//printMessage(msg1);
+	//printMessage(msg2);
+	//printMessage(msg3);
+	//printMessage(msg4);
 
 	//add messages to the linked list
 	msgListNode* head = NULL;
@@ -82,7 +82,6 @@ int main() {
 	//print linked list
 	print(head);
 
-     
 	nodeHashIndex =findMsgByHashIterative(head, msg4->hashDigest.md4);
 	
 	if(nodeHashIndex > 0)
@@ -115,8 +114,7 @@ int main() {
 		printf("Error in the hash number\n");
 	}
 
-	
-
+	//TODO: Add check for other options: like not existed hash
 }
 
 void print_hash(const unsigned char* p) {
@@ -128,12 +126,11 @@ void print_hash(const unsigned char* p) {
 
 msgWithHash* createMessage(unsigned int id, const char* text, HashType type) 
 {
-
 	msgWithHash *msg = (msgWithHash*) calloc(1,sizeof(msgWithHash));
-
 	if (msg == NULL ) 
 	{
 		printf("Error: Out of memory");
+		return;
 	}
 
 	msg->id = id;
@@ -161,10 +158,7 @@ msgWithHash* createMessage(unsigned int id, const char* text, HashType type)
 		return NULL;
 	}
 
-
 	return msg;
-
-
 }
 
 
@@ -247,13 +241,13 @@ msgListNode* addMessage(msgListNode* head, msgWithHash* data)
 
 }
 
-
 /* Print all the elements in the linked list */
 void print(msgListNode* head)
 {
 	msgListNode* current_node = head;
 	while (current_node != NULL) {
-		printf("%d \n", current_node->data->id);
+		//printf("%d \n", current_node->data->id);
+		printMessage(current_node->data);
 		current_node = current_node->next;
 	}
 }
@@ -271,9 +265,20 @@ int findMsgByHashIterative(const msgListNode* head, Byte hash[16])
 
 	while (ptr->next != NULL)
 	{
-
-		result = memcmp(hash, ptr->data->hashDigest.md4, sizeof(ptr->data->hashDigest.md4));
-       
+		if (ptr->data->type == MD4_HASH)
+		{
+			result = memcmp(hash, ptr->data->hashDigest.md4, sizeof(ptr->data->hashDigest.md4));
+		}
+		else if (ptr->data->type == MD5_HASH)
+		{
+			result = memcmp(hash, ptr->data->hashDigest.md5, sizeof(ptr->data->hashDigest.md5));
+		}
+		else
+		{
+			//Unhadnled type
+			return -2;
+		}
+			
 		if (result == 0)
 		{
 			  return nodeIndex;
@@ -297,6 +302,7 @@ int findMsgByHashIterative(const msgListNode* head, Byte hash[16])
 int findMsgByHashRecursive(const msgListNode* head, Byte hash[16]) 
 {
 	static counter = 1;
+	int result = -1;
 
 	if ((hash == NULL) || (head == NULL))
 	{
@@ -308,15 +314,26 @@ int findMsgByHashRecursive(const msgListNode* head, Byte hash[16])
 		return  -1;
 	}
 
+	if (head->data->type == MD4_HASH)
+	{
+		result = memcmp(hash, head->data->hashDigest.md4, sizeof(head->data->hashDigest.md4));
+	}
+	else if (head->data->type == MD5_HASH)
+	{
+		result = memcmp(hash, head->data->hashDigest.md5, sizeof(head->data->hashDigest.md5));
+	}
+	else
+	{
+		//Unhadnled type
+		return -2;
+	}
 
-      int result=memcmp(hash,head->data->hashDigest.md4, sizeof(head->data->hashDigest.md4));
-	  if (result == 0) 
-	  {
-		  return counter;
-	  }
+	if (result == 0) 
+	{
+		return counter;
+	}
 
-	  counter++;
+	counter++;
 
-	  return findMsgByHashRecursive(head->next, hash);
-
+	return findMsgByHashRecursive(head->next, hash);
 }
