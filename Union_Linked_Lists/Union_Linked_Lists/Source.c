@@ -137,7 +137,7 @@ int main() {
 	head = deleteMessage(head, 30);
 	print_list(head);
 #endif
-
+#ifdef TEST_3
 	//Case: Integrity OK
 	if (verifyIntegrity(head, 87651233, msg1->hashDigest.md4) == True)
 	{
@@ -165,6 +165,12 @@ int main() {
 	{
 		printf("Verify FAIL\n");
 	}
+#endif
+	printf("Before reverse\n");
+	print_list(head);
+	head = reverseMsgList(head);
+	printf("After reverse\n");
+	print_list(head);
 }
 
 void print_hash(const unsigned char* p) {
@@ -469,4 +475,27 @@ Bool verifyIntegrity(msgListNode* head, unsigned int id, Byte compareHash[16])
 		}
 	}
 	return verifyIntegrity(head->next, id, compareHash);
+}
+
+//Trick - 1) Move until you not in tail. 2) Now on each back step "swap" links (1->2 --> 2->1) 3) Return new head (prev tail)
+msgListNode* reverseMsgList(msgListNode* head)
+{
+	msgListNode* pTmp = NULL;
+	//Case: Empty list
+	if (head == NULL)
+	{
+		return NULL;
+	}
+	//Case: We reach end of list, now we can start to "swap" links
+	if (head->next == NULL)
+	{
+		return head;
+	}
+	//Recursive call
+	pTmp = reverseMsgList(head->next);
+	head->next->next = head;
+	head->next = NULL;
+
+	return pTmp;
+
 }
